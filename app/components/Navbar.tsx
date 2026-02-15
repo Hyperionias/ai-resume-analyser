@@ -26,7 +26,7 @@ const Navbar = () => {
                 </p>
             </Link>
             <div className="flex items-center gap-2 md:gap-4">
-                <Link to="/" className="px-4 md:px-6 py-1.5 md:py-2 text-xs md:text-sm bg-indigo-500 hover:bg-indigo-600 text-white font-medium rounded-full transition-colors">
+                <Link to="/upload" className="px-4 md:px-6 py-1.5 md:py-2 text-xs md:text-sm bg-indigo-500 hover:bg-indigo-600 text-white font-medium rounded-full transition-colors">
                     Upload Resume
                 </Link>
                 {auth.isAuthenticated && (
