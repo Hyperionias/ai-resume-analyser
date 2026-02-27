@@ -4,7 +4,7 @@
 
 Resumind is an AI-powered resume analysis tool that helps job seekers optimize their resumes for specific job positions. Upload your resume, provide job details, and get instant AI-driven feedback to improve your ATS score and land more interviews.
 
-![Resumind Demo](https://via.placeholder.com/800x400?text=Resumind+Demo)
+https://ai-resume-analyser-green-two.vercel.app/
 
 ---
 
