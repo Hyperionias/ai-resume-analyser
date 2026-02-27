@@ -57,7 +57,7 @@ const Auth = () => {
                     <button
                         onClick={handleSignIn}
                         disabled={isSigningIn || !puterReady}
-                        className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                        className="w-full primary-gradient text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-4 hover:opacity-90"
                     >
                         {isSigningIn ? 'Opening login window…' : !puterReady ? 'Loading…' : 'Log In'}
                     </button>

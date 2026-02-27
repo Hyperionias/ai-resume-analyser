@@ -5,14 +5,30 @@
 @theme {
   --font-sans: "Mona Sans", ui-sans-serif, system-ui, sans-serif,
   "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --color-dark-200: #475467;
-  --color-light-blue-100: #c1d3f81a;
-  --color-light-blue-200: #a7bff14d;
 
+  /* Orange + Turquoise palette replacing old indigo/blue */
+  --color-dark-200: #475467;
+
+  /* Turquoise (primary) — replaces indigo */
+  --color-indigo-50:  #e0fafa;
+  --color-indigo-100: #b5f0ef;
+  --color-indigo-200: #85e4e3;
+  --color-indigo-300: #50d5d4;
+  --color-indigo-400: #28c9c8;
+  --color-indigo-500: #0cb8b7;
+  --color-indigo-600: #0a9897;
+  --color-indigo-700: #087a79;
+  --color-indigo-800: #065d5c;
+  --color-indigo-900: #044342;
+
+  /* Card gradient tints (turquoise) */
+  --color-light-blue-100: #0cb8b71a;
+  --color-light-blue-200: #0cb8b740;
+
+  /* Badges */
   --color-badge-green: #d5faf1;
   --color-badge-red: #f9e3e2;
   --color-badge-yellow: #fceed8;
-
   --color-badge-green-text: #254d4a;
   --color-badge-red-text: #752522;
   --color-badge-yellow-text: #73321b;
@@ -26,8 +42,9 @@ body {
 main {
   @apply min-h-screen pt-10;
 }
+
 h1 {
-  @apply max-sm:text-[3rem] text-6xl  text-gradient leading-tight xl:tracking-[-2px] font-semibold;
+  @apply max-sm:text-[3rem] text-6xl text-gradient leading-tight xl:tracking-[-2px] font-semibold;
 }
 
 h2 {
@@ -37,6 +54,7 @@ h2 {
 label {
   @apply text-dark-200;
 }
+
 input {
   @apply w-full p-4 inset-shadow rounded-2xl focus:outline-none bg-white;
 }
@@ -51,7 +69,11 @@ form {
 
 @layer components {
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#AB8C95] via-[#000000] to-[#8E97C5];
+    /* Orange → dark → turquoise */
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(90deg, #FF7A35, #222222, #0cb8b7);
+    -webkit-background-clip: text;
+    background-clip: text;
   }
   .gradient-border {
     @apply bg-gradient-to-b from-light-blue-100 to-light-blue-200 p-4 rounded-2xl;
@@ -83,31 +105,24 @@ form {
   .resumes-section {
     @apply flex flex-wrap max-md:flex-col max-md:gap-4 gap-6 items-start max-md:items-center w-full max-w-[1850px] justify-evenly;
   }
-
   .resume-card {
     @apply flex flex-col gap-8 h-[560px] w-[350px] lg:w-[430px] xl:w-[490px] bg-white rounded-2xl p-4;
   }
-
   .resume-card-header {
     @apply flex flex-row gap-2 justify-between min-h-[110px] max-sm:flex-col items-center max-md:justify-center max-md:items-center;
   }
-
   .feedback-section {
     @apply flex flex-col gap-8 w-1/2 px-8 max-lg:w-full py-6;
   }
-
   .navbar {
     @apply flex flex-row justify-between items-center bg-white rounded-full p-4 w-full px-10 max-w-[1200px] mx-auto;
   }
-
   .score-badge {
     @apply flex flex-row items-center justify-center py-1 px-2 gap-4 rounded-[96px];
   }
-
   .form-div {
     @apply flex flex-col gap-2 w-full items-start;
   }
-
   .uplader-drag-area {
     @apply relative p-8 text-center transition-all duration-700 cursor-pointer bg-white rounded-2xl min-h-[208px];
   }
@@ -117,11 +132,15 @@ form {
 }
 
 @utility bg-gradient {
-  background: linear-gradient(to bottom, #f0f4ff 60%, #fa7185cc);
+  /* Soft turquoise background fading to warm orange hint at bottom */
+  background: linear-gradient(to bottom, #e8fafa 0%, #fff8f4 60%, #ffe0cc88 100%);
 }
 
 @utility text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#AB8C95] via-[#000000] to-[#8E97C5];
+  background-image: linear-gradient(90deg, #FF7A35, #222222, #0cb8b7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 @utility gradient-hover {
@@ -129,24 +148,26 @@ form {
 }
 
 @utility primary-gradient {
-  background: linear-gradient(to bottom, #8e98ff, #606beb);
-  box-shadow: 0px 74px 21px 0px #6678ef00;
+  /* Turquoise→teal primary button */
+  background: linear-gradient(to bottom, #1ad4d3, #0a9897);
+  box-shadow: 0px 4px 24px 0px #0cb8b740;
 }
 
 @utility primary-gradient-hover {
-  background: linear-gradient(to bottom, #717dff, #4957eb);
+  background: linear-gradient(to bottom, #0fc3c2, #087a79);
 }
 
 @utility inset-shadow {
-  box-shadow: inset 0 0 12px 0 rgba(36, 99, 235, 0.2);
+  box-shadow: inset 0 0 12px 0 rgba(12, 184, 183, 0.18);
   backdrop-filter: blur(10px);
 }
 
+@utility orange-gradient {
+  background: linear-gradient(to bottom, #FF9A5C, #FF6B1A);
+  box-shadow: 0px 4px 24px 0px #FF7A3540;
+}
+
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
