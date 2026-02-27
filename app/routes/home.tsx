@@ -1,11 +1,11 @@
 import type { Route } from "./+types/home";
 import Navbar from "~/components/Navbar";
 import ResumeCard from "~/components/ResumeCard";
-import {usePuterStore} from "~/lib/puter";
-import {useNavigate} from "react-router";
-import {useEffect, useState} from "react";
+import { usePuterStore } from "~/lib/puter";
+import { useNavigate } from "react-router";
+import { useCallback, useEffect, useState } from "react";
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "Resumind" },
     { name: "description", content: "Smart feedback for your dream job!" },
@@ -13,13 +13,13 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const { auth, kv } = usePuterStore();
+  const { auth, kv, fs } = usePuterStore();
   const navigate = useNavigate();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if(!auth.isAuthenticated) {
+    if (!auth.isAuthenticated) {
       navigate('/auth?next=/');
     }
   }, [auth.isAuthenticated, navigate])
@@ -29,9 +29,8 @@ export default function Home() {
       if (!auth.isAuthenticated) return;
 
       try {
-        // Resume listesini çek
         const resumeListData = await kv.get('resume-list');
-        
+
         if (!resumeListData || typeof resumeListData !== 'string') {
           setResumes([]);
           setIsLoading(false);
@@ -39,8 +38,7 @@ export default function Home() {
         }
 
         const resumeIds: string[] = JSON.parse(resumeListData);
-        
-        // Her resume'nin detayını çek
+
         const resumePromises = resumeIds.map(async (id) => {
           try {
             const resumeData = await kv.get(`resume:${id}`);
@@ -56,7 +54,7 @@ export default function Home() {
 
         const fetchedResumes = await Promise.all(resumePromises);
         const validResumes = fetchedResumes.filter((r): r is Resume => r !== null);
-        
+
         setResumes(validResumes);
       } catch (err) {
         console.error('Error fetching resumes:', err);
@@ -68,6 +66,40 @@ export default function Home() {
 
     fetchResumes();
   }, [auth.isAuthenticated, kv]);
+
+  const handleDelete = useCallback(async (id: string) => {
+    // Optimistically remove from UI immediately
+    setResumes((prev) => prev.filter((r) => r.id !== id));
+
+    try {
+      // 1. Update resume-list FIRST — this is what prevents it from reappearing on F5
+      const listData = await kv.get('resume-list');
+      if (listData && typeof listData === 'string') {
+        const list: string[] = JSON.parse(listData);
+        const newList = list.filter((rid) => rid !== id);
+        await kv.set('resume-list', JSON.stringify(newList));
+      }
+
+      // 2. Try to delete the KV entry (best-effort)
+      kv.delete(`resume:${id}`).catch(() => { });
+
+      // 3. Try to delete Puter files (best-effort)
+      const resumeData = await kv.get(`resume:${id}`).catch(() => null);
+      if (resumeData && typeof resumeData === 'string') {
+        const resume: Resume = JSON.parse(resumeData);
+        const pdfPath = resume.resumePath?.replace(/^\/puter-files\//, '');
+        const imgPath = resume.imagePath?.replace(/^\/puter-files\//, '');
+        if (pdfPath) fs.delete(pdfPath).catch(() => { });
+        if (imgPath) fs.delete(imgPath).catch(() => { });
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      // If the list update failed, restore the resume in UI
+      // (reload from KV to get accurate state)
+      window.location.reload();
+    }
+  }, [kv, fs]);
+
 
   if (isLoading) {
     return (
@@ -98,7 +130,7 @@ export default function Home() {
     {resumes.length > 0 ? (
       <div className="resumes-section">
         {resumes.map((resume) => (
-          <ResumeCard key={resume.id} resume={resume} />
+          <ResumeCard key={resume.id} resume={resume} onDelete={handleDelete} />
         ))}
       </div>
     ) : (
@@ -120,3 +152,5 @@ export default function Home() {
     )}
   </main>;
 }
+
+

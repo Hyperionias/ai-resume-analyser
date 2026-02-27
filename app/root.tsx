@@ -13,6 +13,10 @@ import type { Route } from "./+types/root";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
+  { rel: "preconnect", href: "https://js.puter.com" },
+  { rel: "preconnect", href: "https://api.puter.com" },
+  { rel: "dns-prefetch", href: "https://js.puter.com" },
+  { rel: "dns-prefetch", href: "https://api.puter.com" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",
@@ -31,11 +35,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script src="https://js.puter.com/v2/" />
         <Meta />
         <Links />
       </head>
       <body>
-        <script src="https://js.puter.com/v2/"></script>
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -43,6 +47,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     </html>
   );
 }
+
 
 export default function App() {
   const { init } = usePuterStore();

@@ -73,7 +73,7 @@ interface PuterStore {
             options?: PuterChatOptions
         ) => Promise<AIResponse | undefined>;
         feedback: (
-            path: string,
+            imageFile: File | Blob,
             message: string
         ) => Promise<AIResponse | undefined>;
         img2txt: (
@@ -226,13 +226,22 @@ export const usePuterStore = create<PuterStore>((set, get) => {
     };
 
     const init = (): void => {
-        const puter = getPuter();
-        if (puter) {
+        // If already loaded
+        if (getPuter()) {
             set({ puterReady: true });
             checkAuthStatus();
             return;
         }
 
+        // Dynamically inject Puter.js if not already in the DOM
+        if (typeof document !== 'undefined' && !document.querySelector('script[src*="js.puter.com"]')) {
+            const script = document.createElement('script');
+            script.src = 'https://js.puter.com/v2/';
+            script.async = true;
+            document.head.appendChild(script);
+        }
+
+        // Poll until puter is available
         const interval = setInterval(() => {
             if (getPuter()) {
                 clearInterval(interval);
@@ -244,10 +253,11 @@ export const usePuterStore = create<PuterStore>((set, get) => {
         setTimeout(() => {
             clearInterval(interval);
             if (!getPuter()) {
-                setError("Puter.js failed to load within 10 seconds");
+                setError("Puter.js failed to load. Check your internet connection and try refreshing.");
             }
-        }, 10000);
+        }, 15000);
     };
+
 
     const write = async (path: string, data: string | File | Blob) => {
         const puter = getPuter();
@@ -311,31 +321,24 @@ export const usePuterStore = create<PuterStore>((set, get) => {
         >;
     };
 
-    const feedback = async (path: string, message: string) => {
+    const feedback = async (imageFile: File | Blob, message: string) => {
         const puter = getPuter();
         if (!puter) {
             setError("Puter.js not available");
             return;
         }
 
-        return puter.ai.chat(
-            [
-                {
-                    role: "user",
-                    content: [
-                        {
-                            type: "file",
-                            puter_path: path,
-                        },
-                        {
-                            type: "text",
-                            text: message,
-                        },
-                    ],
-                },
-            ],
-            { model: "claude-sonnet-4" }
-        ) as Promise<AIResponse | undefined>;
+        // Step 1: Extract text from the resume image via OCR
+        const extractedText = await puter.ai.img2txt(imageFile);
+
+        if (!extractedText) {
+            throw new Error("Could not extract text from resume image. Make sure the PDF is text-readable.");
+        }
+
+        // Step 2: Analyze the extracted text with the full prompt
+        const fullPrompt = `${message}\n\nHere is the resume content (extracted via OCR):\n\n${extractedText}`;
+
+        return puter.ai.chat(fullPrompt) as Promise<AIResponse | undefined>;
     };
 
     const img2txt = async (image: string | File | Blob, testMode?: boolean) => {
@@ -422,7 +425,7 @@ export const usePuterStore = create<PuterStore>((set, get) => {
                 testMode?: boolean,
                 options?: PuterChatOptions
             ) => chat(prompt, imageURL, testMode, options),
-            feedback: (path: string, message: string) => feedback(path, message),
+            feedback: (imageFile: File | Blob, message: string) => feedback(imageFile, message),
             img2txt: (image: string | File | Blob, testMode?: boolean) =>
                 img2txt(image, testMode),
         },

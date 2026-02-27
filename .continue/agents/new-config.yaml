@@ -1,0 +1,30 @@
+name: Mert'in Yerel Qwen Kurulumu
+version: 1.0.0
+schema: v1
+
+# Modellerin Tanımlanması
+models:
+  - name: Local Qwen 32B
+    provider: openai
+    model: qwen
+    apiBase: http://localhost:1234/v1
+    apiKey: lm-studio  # Boş kalmasın diye rastgele bir değer
+
+# Kod Yazarken Otomatik Tamamlama (Tab)
+tabAutocompleteModel:
+  name: Local Autocomplete
+  provider: openai
+  model: qwen
+  apiBase: http://localhost:1234/v1
+  apiKey: lm-studio
+
+# Projeyi Claude gibi "anlaması" için Indexing (Gömme) Ayarı
+embeddingsProvider:
+  provider: free-threading
+  model: all-MiniLM-L6-v2
+
+# Özel Komutlar (İsteğe bağlı)
+customCommands:
+  - name: optimize
+    description: Seçili kodu performans için optimize et
+    prompt: "{{{ input }}}\n\nYukarıdaki kodu performans ve okunabilirlik açısından optimize et."
